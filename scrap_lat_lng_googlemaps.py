@@ -1,11 +1,25 @@
 import time
-
 import geopandas as gpd
 import orjson
-import osmnx as ox
 import pandas as pd
+import googlemaps
 from shapely.geometry import Point
 from tqdm import tqdm
+
+# Twój klucz API
+gmaps = googlemaps.Client(key="AIzaSyBi7_dJC8HWW9nq4vMXGXSlHhiTHWCmAcQ")
+
+
+def geocode_with_googlemaps(query):
+    geocode_result = gmaps.geocode(query)
+    if not geocode_result:
+        raise ValueError(f"Nie znaleziono lokalizacji: {query}")
+
+    location = geocode_result[0]['geometry']['location']
+    return Point(location['lng'], location['lat'])
+
+
+# Wczytanie danych
 df = pd.read_csv('Airplane_Crashes_and_Fatalities_Since_1908_t0_2023.csv', encoding='latin1')
 df['Location'] = df['Location'].astype(str).str.strip()
 unique_locations = df['Location'].dropna().unique()
@@ -20,26 +34,10 @@ for loc in tqdm(unique_locations):
     loc_query = locations_dict.get(loc_key, loc_key)
 
     try:
-        geom = ox.geocoder.geocode(loc_query)
+        geom = geocode_with_googlemaps(loc_query)
 
-        if geom is None:
-            raise ValueError(f"Nominatim geocoder returned 0 results for query '{loc_query}'")
-
-        # Jeśli mamy listę geometrii — weź pierwszą
-        if isinstance(geom, list):
-            if not geom:
-                raise ValueError(f"Nominatim geocoder returned empty list for query '{loc_query}'")
-            geom = geom[0]
-
-        # Jeśli dostajemy tylko współrzędne (lat, lon) — konwertuj na Point
-        if isinstance(geom, tuple) and len(geom) == 2:
-            lat, lon = geom
-            geom = Point(lon, lat)
-
-        # Tworzymy GeoDataFrame ręcznie
+        # Tworzenie GeoDataFrame i przeliczanie centroidu
         gdf = gpd.GeoDataFrame(index=[0], crs='EPSG:4326', geometry=[geom])
-
-        # Wyznaczamy centroid (w EPSG:3857)
         gdf_proj = gdf.to_crs(epsg=3857)
         centroid = gdf_proj.geometry.centroid.iloc[0]
         centroid_wgs84 = gpd.GeoSeries([centroid], crs='EPSG:3857').to_crs(epsg=4326).iloc[0]
@@ -58,16 +56,15 @@ for loc in tqdm(unique_locations):
         }
         print(f"Nie udało się zlokalizować: {loc_query} — {e}")
 
-    # time.sleep(1)
+    time.sleep(0.2)  # Ograniczenie zapytań
 
+# Dodanie współrzędnych do DataFrame
 df['Latitude'] = df['Location'].map(lambda x: location_data.get(x, {}).get('lat'))
 df['Longitude'] = df['Location'].map(lambda x: location_data.get(x, {}).get('lng'))
 df['Geometry'] = df['Location'].map(lambda x: location_data.get(x, {}).get('geometry'))
 
 df.to_csv('crashes_with_coordinates.csv', index=False)
 
+# Zapis do GeoJSON
 gdf_full = gpd.GeoDataFrame(df, geometry='Geometry', crs='EPSG:4326')
 gdf_full.to_file('crashes_with_geometries.geojson', driver='GeoJSON')
-# AIzaSyDmynxoTdKre76RwXP0ztNZbm-oWYTzfoM
-
-# pip install googlemaps
