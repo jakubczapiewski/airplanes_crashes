@@ -68,6 +68,3 @@ df.to_csv('crashes_with_coordinates.csv', index=False)
 
 gdf_full = gpd.GeoDataFrame(df, geometry='Geometry', crs='EPSG:4326')
 gdf_full.to_file('crashes_with_geometries.geojson', driver='GeoJSON')
-# AIzaSyDmynxoTdKre76RwXP0ztNZbm-oWYTzfoM
-
-# pip install googlemaps

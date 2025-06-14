@@ -16,6 +16,8 @@ def load_data(file_path='crashes_with_coordinates.csv'):
     # Convert Date to datetime format
     df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
 
+    df['']
+
     # Fill NaN values in numeric columns
     numeric_columns = ['Aboard', 'Fatalities', 'Aboard Passangers', 'Aboard Crew', 
                        'Fatalities Passangers', 'Fatalities Crew', 'Ground']
@@ -66,9 +68,14 @@ def create_scatter_map(df):
         title='Airplane Crashes Around the World'
     )
 
-    # Update hover template to use custom hover text
+    fig.update_geos(projection_type="orthographic")
     fig.update_traces(
-        hovertemplate="%{customdata[0]}<extra></extra>"
+        hovertemplate="%{customdata[0]}<extra></extra>",
+        # cluster=dict(enabled=True,),
+        # selector=dict(type='scattermap'),
+        # cluster_color=['red','green'],
+        # cluster_size=[20,40],
+        # cluster_step=-1,
     )
 
     # Use OpenStreetMap for the base map
@@ -77,7 +84,46 @@ def create_scatter_map(df):
         height=800
     )
 
+
     return fig
+
+
+
+def create_globe_scatter(df):
+    fig = go.Figure()
+
+    fig.add_trace(go.Scattergeo(
+        lon=df['Longitude'],
+        lat=df['Latitude'],
+        text=df['Location'],
+        marker=dict(
+            size=8,
+            color=df['Fatalities'],
+            colorscale='Viridis',
+            cmin=0,
+            cmax=df['Fatalities'].max(),
+            colorbar=dict(title="Fatalities")
+        ),
+        hoverinfo='text'
+    ))
+
+    fig.update_geos(
+        projection_type="orthographic",
+        showland=True,
+        landcolor="rgb(230, 230, 230)",
+        showocean=True,
+        oceancolor="rgb(204, 238, 255)",
+        showcountries=True
+    )
+
+    fig.update_layout(
+        title='Airplane Crashes on Globe',
+        height=800,
+        margin={"r":0,"t":50,"l":0,"b":0}
+    )
+
+    return fig
+
 
 def create_heatmap(df):
     """
@@ -165,19 +211,20 @@ def main():
     # Create scatter map
     scatter_map = create_scatter_map(df)
     scatter_map.write_html('airplane_crashes_map.html')
+    scatter_map.write_image('airplane_crashes_map.webp')
 
+    scatter_map_globe=create_globe_scatter(df)
+    scatter_map_globe.write_html('airplane_crashes_globe.html')
+    scatter_map_globe.write_image('airplane_crashes_globe.webp')
     # Create heatmap
     heatmap = create_heatmap(df)
     heatmap.write_html('airplane_crashes_heatmap.html')
+    heatmap.write_image('airplane_crashes_heatmap.webp')
 
     # Create time series
     time_series = create_time_series(df)
     time_series.write_html('airplane_crashes_time_series.html')
 
-    print("Maps created successfully!")
-    print("- Scatter map saved as 'airplane_crashes_map.html'")
-    print("- Heatmap saved as 'airplane_crashes_heatmap.html'")
-    print("- Time series saved as 'airplane_crashes_time_series.html'")
 
 if __name__ == "__main__":
     main()

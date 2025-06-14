@@ -6,7 +6,6 @@ import googlemaps
 from shapely.geometry import Point
 from tqdm import tqdm
 
-# Twój klucz API
 gmaps = googlemaps.Client(key="AIzaSyBi7_dJC8HWW9nq4vMXGXSlHhiTHWCmAcQ")
 
 

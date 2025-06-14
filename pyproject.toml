@@ -1,0 +1,20 @@
+[project]
+name = "airplanes-crashes"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "dash>=3.0.4",
+    "geopandas>=1.1.0",
+    "googlemaps>=4.10.0",
+    "ollama>=0.5.1",
+    "orjson>=3.10.18",
+    "osmnx>=2.0.4",
+    "pandas>=2.3.0",
+    "plotly>=6.1.2",
+    "setuptools>=80.9.0",
+    "shapely>=2.1.1",
+    "tqdm>=4.67.1",
+    "wheel>=0.45.1",
+]
