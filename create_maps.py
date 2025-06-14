@@ -16,7 +16,6 @@ def load_data(file_path='crashes_with_coordinates.csv'):
     # Convert Date to datetime format
     df['Date'] = pd.to_datetime(df['Date'], errors='coerce')
 
-    df['']
 
     # Fill NaN values in numeric columns
     numeric_columns = ['Aboard', 'Fatalities', 'Aboard Passangers', 'Aboard Crew', 
@@ -211,15 +210,15 @@ def main():
     # Create scatter map
     scatter_map = create_scatter_map(df)
     scatter_map.write_html('airplane_crashes_map.html')
-    scatter_map.write_image('airplane_crashes_map.webp')
+    scatter_map.write_image('airplane_crashes_map.png')
 
     scatter_map_globe=create_globe_scatter(df)
     scatter_map_globe.write_html('airplane_crashes_globe.html')
-    scatter_map_globe.write_image('airplane_crashes_globe.webp')
+    scatter_map_globe.write_image('airplane_crashes_globe.png')
     # Create heatmap
     heatmap = create_heatmap(df)
     heatmap.write_html('airplane_crashes_heatmap.html')
-    heatmap.write_image('airplane_crashes_heatmap.webp')
+    heatmap.write_image('airplane_crashes_heatmap.png')
 
     # Create time series
     time_series = create_time_series(df)

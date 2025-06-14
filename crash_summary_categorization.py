@@ -8,9 +8,9 @@ unique_summary = df['Summary'].dropna().apply(lambda x: x.strip()).unique()
 
 def summary_with_ollama(location):
     prompt = f"""
-    Given an airplanes crash summary, return a one word crash cause
+    Given an airplane crash summary, return a one-word cause of the crash.
 
-    Only return the crash cause — no explanation, no extra text.
+    Only return the single word — no explanation, no additional text.
 
     Input: {location}
     Output:"""
