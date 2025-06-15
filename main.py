@@ -4,6 +4,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 from sklearn.linear_model import LinearRegression
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
 
 pd.options.plotting.backend = "plotly"
 
@@ -121,3 +122,35 @@ fig = px.line(combined_df, x='Year', y='Crashes', color='Type',
 fig.update_traces(mode='lines+markers')
 fig.show()
 fig.write_image("crash_prediction_2025_2030.png")
+
+
+
+# Upewniamy się, że dane są w porządku czasowym
+crashes_per_year_sorted = crashes_per_year.sort_values('Year')
+crashes_per_year_sorted.set_index('Year', inplace=True)
+
+# Tworzymy model wygładzania (Holt-Winters bez sezonowości)
+model = ExponentialSmoothing(crashes_per_year_sorted['Crashes'], trend='add', seasonal=None)
+fit = model.fit()
+
+# Prognozujemy kolejne 6 lat (2025–2030)
+forecast_years = np.arange(crashes_per_year_sorted.index.max() + 1, crashes_per_year_sorted.index.max() + 7)
+forecast = fit.forecast(6)
+
+# Tworzymy ramkę z predykcją
+forecast_df = pd.DataFrame({'Year': forecast_years, 'Crashes': forecast.values})
+forecast_df['Type'] = 'Prediction'
+
+# Dane historyczne
+history_df = crashes_per_year_sorted.reset_index()
+history_df['Type'] = 'History'
+
+# Łączymy dane
+combined_forecast = pd.concat([history_df, forecast_df])
+
+# Wykres
+fig = px.line(combined_forecast, x='Year', y='Crashes', color='Type',
+              title='Prognoza liczby wypadków (model wygładzania wykładniczego)')
+fig.update_traces(mode='lines+markers')
+fig.show()
+fig.write_image("ets_forecast_crashes.png")

@@ -16,6 +16,7 @@ dependencies = [
     "scikit-learn>=1.7.0",
     "setuptools>=80.9.0",
     "shapely>=2.1.1",
+    "statsmodels>=0.14.4",
     "tqdm>=4.67.1",
     "wheel>=0.45.1",
 ]
