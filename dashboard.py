@@ -31,7 +31,7 @@ ts_data = crashes_per_year.copy()
 ts_data["Date"] = pd.to_datetime(ts_data["Year"].astype(str) + "-01-01")
 ts_data.set_index("Date", inplace=True)
 
-# === ETS model ===
+# === ETS model === Metoda Holt-Winters
 model = ExponentialSmoothing(ts_data["Crashes"], trend="add", seasonal=None)
 fit = model.fit()
 
