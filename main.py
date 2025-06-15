@@ -1,7 +1,9 @@
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+from sklearn.linear_model import LinearRegression
 
 pd.options.plotting.backend = "plotly"
 
@@ -93,3 +95,29 @@ fig.update_yaxes(title_text="Liczba wypadków", secondary_y=True)
 
 fig.show()
 fig.write_image("fatality_vs_crashes_per_ac_type.png")
+
+# Przygotowanie danych
+X = crashes_per_year['Year'].values.reshape(-1, 1)
+y = crashes_per_year['Crashes'].values
+
+# Trening modelu regresji liniowej
+model = LinearRegression()
+model.fit(X, y)
+
+# Predykcja na lata 2025–2030
+future_years = np.arange(2025, 2031).reshape(-1, 1)
+future_predictions = model.predict(future_years)
+
+# Połączenie danych historycznych i predykcji
+predicted_df = pd.DataFrame({'Year': future_years.flatten(), 'Crashes': future_predictions})
+combined_df = pd.concat([crashes_per_year, predicted_df], ignore_index=True)
+
+# Oznacz czy dane są przewidywane
+combined_df['Type'] = ['History'] * len(crashes_per_year) + ['Prediction'] * len(predicted_df)
+
+# Wizualizacja
+fig = px.line(combined_df, x='Year', y='Crashes', color='Type',
+              title='Liczba wypadków lotniczych – dane historyczne i prognoza (2025–2030)')
+fig.update_traces(mode='lines+markers')
+fig.show()
+fig.write_image("crash_prediction_2025_2030.png")

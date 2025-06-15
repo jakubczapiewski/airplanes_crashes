@@ -13,6 +13,7 @@ dependencies = [
     "osmnx>=2.0.4",
     "pandas>=2.3.0",
     "plotly>=6.1.2",
+    "scikit-learn>=1.7.0",
     "setuptools>=80.9.0",
     "shapely>=2.1.1",
     "tqdm>=4.67.1",
